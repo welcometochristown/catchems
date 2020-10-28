@@ -4,6 +4,7 @@
 from card import Card
 from deck import Deck
 from player import Player
+import rules
 
 # # Initializing Pygame
 # pygame.init()
@@ -24,7 +25,14 @@ from player import Player
 mainDeck = Deck()
 discardDeck = Deck(False)
 turnDeck = Deck(False)
-players = [Player('bot1', True), Player('bot2', True), Player('bot3', True)]
+
+players = create_bots()
+
+def create_bots():
+    arr = []
+    for i in range(rules.MAX_BOTS):
+        arr.append(Player('bot'+str(i), True))
+    return arr
 
 def discard_player_hand(player):
     discardDeck.add_deck(player.hand)
@@ -40,17 +48,18 @@ def shuffle():
     print ('shuffling..')
     mainDeck.shuffle()
 
-def deal(active_players, cards=5):
+def deal(active_players, cards=rules.PLAYER_CARDS):
     #deal [cards] cards to each player
     print ('dealing..')
     for i in range(cards):
         for p in active_players:
             p.hand.add(mainDeck.take())
 
-def play_rounds(active_players, rounds=5):
+def play_rounds(active_players, rounds=rules.PLAYER_CARDS):
+    #play [rounds] rounds for each player in [active_players]
     prevCard = None
     prevPlayer = None
-    lifelose = 1
+    lifelose = rules.MIN_LIFE_LOSS
 
     for i in range(rounds):
         for p in active_players:
@@ -59,28 +68,36 @@ def play_rounds(active_players, rounds=5):
                     discard_player_hand(p)
                 continue
             c = play_turn(p, prevCard)
-            if compare_turns(prevPlayer, prevCard, p, c):
+
+            if compare_turns(prevCard, c):
                 remove_life(prevPlayer, lifelose)
                 lifelose +=1
             else:
-                lifelose = 1
+                lifelose = rules.MIN_LIFE_LOSS
             prevCard = c
             prevPlayer = p
+        #end of round
         discard_turn_deck()
         print_lives()
-         
 
+def compare_turns(prevCard, card):
+    if prevCard is None:
+        return False
+    return (card.value == prevCard.value)
+    
 def play_turn(player, lastCardPlayed):
+    #[player] takes their turn
     if not player.bot:
         card = choose_human_card(player)
     else:
         card = choose_bot_card(player, lastCardPlayed)
 
-    print(player.name + 'plays ' + str(card))
+    print(player.name + ' plays ' + str(card))
     turnDeck.add(card)
     return card
 
 def choose_human_card(player):
+    #human player choses a card (using input)
     while True:
         print(player.hand.cards)
         choice = input('Please enter your card: ')
@@ -90,22 +107,17 @@ def choose_human_card(player):
         return player.hand.takeCard(cards[0])
 
 def choose_bot_card(player, lastCardPlayed):   
+    #bot player choses a card (using ai)
     matches = [x for x in player.hand.cards if x.value == lastCardPlayed.value]
     if len(matches) > 0:
         return player.hand.takeCard(matches[0])
     return player.hand.take()
 
-def remove_life(player, amount):
-        player.lives-=amount
-        print(player.name + ' loses ' + str(amount) + 'x life!')
+def remove_life(player, lifelose):
+        player.lives-=lifelose
+        print(player.name + ' loses ' + str(lifelose) + 'x life!')
         if player.lives == 0:
             print(player.name + ' is out of the game!')
-
-def compare_turns(prevPlayer, prevCard, player, card):
-    if prevPlayer is None or player is None:
-        return False
-
-    return (card.value == prevCard.value)
 
 def print_lives():
     for p in players:
