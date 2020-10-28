@@ -1,4 +1,3 @@
-import random
 #import pygame
 
 #game modules
@@ -28,80 +27,92 @@ turnDeck = Deck(False)
 players = [Player('bot1', True), Player('bot2', True), Player('bot3', True)]
 
 def discard_player_hand(player):
-    for c in range(len(player.cards)):
-        card = player.cards.pop()
-        discardDeck.cards.append(card)
+    discardDeck.add_deck(player.hand)
 
 def discard_turn_deck():
-    for c in range(len(turnDeck.cards)):
-        card = turnDeck.cards.pop()
-        discardDeck.cards.append(card)
+    discardDeck.add_deck(turnDeck)
 
 def empty_discard_deck():
-    for c in range(len(discardDeck.cards)):
-        card = discardDeck.cards.pop()
-        mainDeck.cards.append(card)
+    mainDeck.add_deck(discardDeck)
 
 def shuffle():
     #shuffle the deck
     print ('shuffling..')
-    random.shuffle(mainDeck.cards)
+    mainDeck.shuffle()
 
 def deal(active_players, cards=5):
     #deal [cards] cards to each player
     print ('dealing..')
     for i in range(cards):
         for p in active_players:
-            p.cards.append(mainDeck.cards.pop())
+            p.hand.add(mainDeck.take())
 
-def play_round(active_players, cards=5):
+def play_rounds(active_players, rounds=5):
     prevCard = None
     prevPlayer = None
-    
-    for i in range(cards):
+    lifelose = 1
+
+    for i in range(rounds):
         for p in active_players:
             if p.lives == 0:
-                if len(p.cards) > 0:
+                if len(p.hand.cards) > 0:
                     discard_player_hand(p)
                 continue
-            c = play_turn(p)
-            compare_turns(prevPlayer, prevCard, p, c)
+            c = play_turn(p, prevCard)
+            if compare_turns(prevPlayer, prevCard, p, c):
+                remove_life(prevPlayer, lifelose)
+                lifelose +=1
+            else:
+                lifelose = 1
             prevCard = c
             prevPlayer = p
-        discard_turn_deck()     
-    empty_discard_deck() 
+        discard_turn_deck()
+        print_lives()
+         
 
-def play_turn(player):
+def play_turn(player, lastCardPlayed):
     if not player.bot:
-        print(player.cards)
-        while True:
-            choice = input('Please enter your card: ')
-            cards = [(i,x) for i, x in enumerate(player.cards) if x.short == choice]
-
-            if len(cards) != 1:
-                continue
-
-            card = cards[0][1]
-            del player.cards[cards[0][0]]
-
-            break
+        card = choose_human_card(player)
     else:
-        card = player.cards.pop()
-    
+        card = choose_bot_card(player, lastCardPlayed)
+
     print(player.name + 'plays ' + str(card))
-    turnDeck.cards.append(card)
+    turnDeck.add(card)
     return card
+
+def choose_human_card(player):
+    while True:
+        print(player.hand.cards)
+        choice = input('Please enter your card: ')
+        cards = [x for x in player.hand.cards if x.short == choice]
+        if len(cards) != 1:
+            continue
+        return player.hand.takeCard(cards[0])
+
+def choose_bot_card(player, lastCardPlayed):   
+    matches = [x for x in player.hand.cards if x.value == lastCardPlayed.value]
+    if len(matches) > 0:
+        return player.hand.takeCard(matches[0])
+    return player.hand.take()
+
+def remove_life(player, amount):
+        player.lives-=amount
+        print(player.name + ' loses ' + str(amount) + 'x life!')
+        if player.lives == 0:
+            print(player.name + ' is out of the game!')
 
 def compare_turns(prevPlayer, prevCard, player, card):
     if prevPlayer is None or player is None:
-        return
+        return False
 
-    if card.value == prevCard.value:
-        prevPlayer.lives-=1
-        print(prevPlayer.name + ' loses a life!')
-        if prevPlayer.lives == 0:
-            print(prevPlayer.name + ' is out of the game!')
+    return (card.value == prevCard.value)
 
+def print_lives():
+    for p in players:
+        lives = ''
+        for l in range(p.lives):
+            lives += '*'
+        print(p.name + ' ' + lives)
 
 # font = pygame.font.Font('freesansbold.ttf', 32) 
   
@@ -147,8 +158,9 @@ def main():
 
         shuffle()
         deal(active_players)
-        play_round(active_players)
+        play_rounds(active_players)
+        empty_discard_deck() 
 
 #while True:
-    if __name__ == '__main__':
-        main()
+if __name__ == '__main__':
+    main()
