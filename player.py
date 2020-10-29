@@ -7,3 +7,4 @@ class Player:
         self.name = name
         self.lives = lives
         self.bot = bot
+        self.seat = None

@@ -1,32 +1,33 @@
-#import pygame
+import pygame
 
 #game modules
 from card import Card
 from deck import Deck
 from player import Player
+from seat import Seat
+
 import rules
+from gui.gColors import *
+import gui.gHand
 
-# # Initializing Pygame
-# pygame.init()
+# Screen
+WIDTH = 800
+HEIGHT = 600
+SEAT_WIDTH = 250
+SEAT_HEIGHT = 250
+EDGE_PADDING = 100
 
-# # Screen
-# WIDTH = 750
-
-# win = pygame.display.set_mode((WIDTH, WIDTH))
-# pygame.display.set_caption("Catchem's")
-
-# # Colors
-# WHITE = (255, 255, 255)
-# BLACK = (0, 0, 0)
-# GRAY = (200, 200, 200)
-# RED = (255, 0, 0)
-# BLUE = (0, 0, 255)
+pygame.init()
+win = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Catchem's")
 
 mainDeck = Deck()
 discardDeck = Deck(False)
 turnDeck = Deck(False)
-
-players = create_bots()
+seats = [Seat((WIDTH/2) - (SEAT_WIDTH/2), HEIGHT-(SEAT_HEIGHT/2)), 
+         Seat(0, (HEIGHT/2) - (SEAT_HEIGHT/2)), 
+         Seat(WIDTH/2, 0), 
+         Seat(WIDTH-(SEAT_WIDTH), HEIGHT/2)] #bottom middle -> clockwise
 
 def create_bots():
     arr = []
@@ -78,7 +79,6 @@ def play_rounds(active_players, rounds=rules.PLAYER_CARDS):
             prevPlayer = p
         #end of round
         discard_turn_deck()
-        print_lives()
 
 def compare_turns(prevCard, card):
     if prevCard is None:
@@ -119,49 +119,45 @@ def remove_life(player, lifelose):
         if player.lives == 0:
             print(player.name + ' is out of the game!')
 
-def print_lives():
-    for p in players:
-        lives = ''
-        for l in range(p.lives):
-            lives += '*'
-        print(p.name + ' ' + lives)
-
-# font = pygame.font.Font('freesansbold.ttf', 32) 
+font = pygame.font.Font('freesansbold.ttf', 32) 
   
-# def render():
-#     win.fill(WHITE)
+def render(players):
+    win.fill(WHITE)
 
-#     render_cards()
-#     render_gui()
+    render_cards(players)
+    render_gui()
 
-#     pygame.display.update()
+    pygame.display.update()
 
-# def render_cards():
-#     pass
+def render_cards(players):
+    for p in players:
+        gui.gHand.draw(p.hand, win, p.seat.x, p.seat.y)
 
-# def render_gui():
-#     for p in range(len(players)):
-#         text = font.render(players[p].name, True, BLUE, WHITE) 
-#         textRect = text.get_rect()  
-#         textRect.center = (700 // 2, (p*100)+ textRect.height/2) 
-#         win.blit(text, textRect) 
+def render_gui():
+    pass
 
 def main():
 
-    # run = True
-
-    # while run:
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT:
-    #             pygame.quit()
-
-    #     render()
+    #add bots
+    bots = create_bots()
 
     #add human player
-    name = input('Please enter your name: ')
-    players.insert(0, Player(name))
+    name = 'chris'#input('Please enter your name: ')
+    human_player = Player(name)
+
+    players = [human_player] + bots
+
+    #assign seat to each player
+    for p in range(len(players)):
+        players[p].seat = seats[p]
+
+    run = True
 
     while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
         active_players = [x for x in players if x.lives > 0]
         
         if len(active_players) == 1:
@@ -170,9 +166,11 @@ def main():
 
         shuffle()
         deal(active_players)
+        render(players)
+        
         play_rounds(active_players)
-        empty_discard_deck() 
+       # empty_discard_deck() 
 
-#while True:
-if __name__ == '__main__':
-    main()
+while True:
+    if __name__ == '__main__':
+        main()
