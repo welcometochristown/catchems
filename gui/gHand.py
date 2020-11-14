@@ -1,13 +1,11 @@
 import pygame
-import deck
 from gui.gColors import *
+from gui.gConstants import *
 
-CARD_WIDTH = 50
-CARD_HEIGHT = 100
-SPACER = 5
-
+def printHello():
+    print ("hello")
 def draw(deck, window, x, y):
     for c in deck.cards:
         pygame.draw.rect(window, BLACK, pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT),2)
-        x += CARD_WIDTH + SPACER
+        x += CARD_WIDTH + CARD_SPACER
 

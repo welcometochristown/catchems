@@ -7,10 +7,17 @@ from player import Player
 from seat import Seat
 
 import rules
+from gui import gHand, gLife, gSeat
+from gui.gConstants import *
 from gui.gColors import *
-from gui.gHand import *
-from gui.gLife import *
-from gui.gSeat import *
+
+
+# import gui.gHand
+# from gui import *
+# from gui.gColors import *
+# from gui.gHand import *
+# from gui.gLife import *
+# from gui.gSeat import *
 
 # Screen
 WIDTH = 1000
@@ -137,13 +144,13 @@ def render_player(player):
     render_lives(player)
 
 def render_cards(player):
-    gui.gHand.draw(player.hand, win, player.seat.x, player.seat.y+SEAT_HEIGHT-CARD_HEIGHT)
+    gHand.draw(player.hand, win, player.seat.x, player.seat.y+SEAT_HEIGHT-CARD_HEIGHT)
 
 def render_lives(player):
-    gui.gLife.draw(player.lives, win, player.seat.x, player.seat.y)
+    gLife.draw(player.lives, win, player.seat.x+LIFE_RADIUS, player.seat.y+LIFE_RADIUS)
 
 def render_seat(seat):
-    pass#gui.gSeat.draw(seat, win, seat.x, seat.y)
+    gSeat.draw(seat, win, seat.x, seat.y)
 
 def main():
 

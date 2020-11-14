@@ -1,10 +1,7 @@
 import pygame
 import seat
 from gui.gColors import *
-
-MARKER_SIZE = 10
-SEAT_WIDTH = 310
-SEAT_HEIGHT = 200
+from gui.gConstants import *
 
 def draw(seat, window, x, y):
     pygame.draw.rect(window, BLACK, (x,y, SEAT_WIDTH, SEAT_HEIGHT), 2)
