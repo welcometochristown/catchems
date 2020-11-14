@@ -8,13 +8,13 @@ from seat import Seat
 
 import rules
 from gui.gColors import *
-import gui.gHand
+from gui.gHand import *
+from gui.gLife import *
+from gui.gSeat import *
 
 # Screen
-WIDTH = 800
-HEIGHT = 600
-SEAT_WIDTH = 250
-SEAT_HEIGHT = 250
+WIDTH = 1000
+HEIGHT = 650
 EDGE_PADDING = 100
 
 pygame.init()
@@ -24,10 +24,10 @@ pygame.display.set_caption("Catchem's")
 mainDeck = Deck()
 discardDeck = Deck(False)
 turnDeck = Deck(False)
-seats = [Seat((WIDTH/2) - (SEAT_WIDTH/2), HEIGHT-(SEAT_HEIGHT/2)), 
-         Seat(0, (HEIGHT/2) - (SEAT_HEIGHT/2)), 
-         Seat(WIDTH/2, 0), 
-         Seat(WIDTH-(SEAT_WIDTH), HEIGHT/2)] #bottom middle -> clockwise
+seats = [Seat((WIDTH/2) - (SEAT_WIDTH/2), HEIGHT-SEAT_HEIGHT),
+         Seat(0, (HEIGHT/2) - (SEAT_HEIGHT/2)),
+         Seat((WIDTH/2) - (SEAT_WIDTH/2), 0),
+         Seat(WIDTH-(SEAT_WIDTH), (HEIGHT/2) - (SEAT_HEIGHT/2))] #bottom middle -> clockwise
 
 def create_bots():
     arr = []
@@ -49,21 +49,21 @@ def shuffle():
     print ('shuffling..')
     mainDeck.shuffle()
 
-def deal(active_players, cards=rules.PLAYER_CARDS):
+def deal(players, cards=rules.PLAYER_CARDS):
     #deal [cards] cards to each player
     print ('dealing..')
     for i in range(cards):
-        for p in active_players:
+        for p in players:
             p.hand.add(mainDeck.take())
 
-def play_rounds(active_players, rounds=rules.PLAYER_CARDS):
+def play_rounds(players, rounds=rules.PLAYER_CARDS):
     #play [rounds] rounds for each player in [active_players]
     prevCard = None
     prevPlayer = None
     lifelose = rules.MIN_LIFE_LOSS
 
     for i in range(rounds):
-        for p in active_players:
+        for p in players:
             if p.lives == 0:
                 if len(p.hand.cards) > 0:
                     discard_player_hand(p)
@@ -84,7 +84,7 @@ def compare_turns(prevCard, card):
     if prevCard is None:
         return False
     return (card.value == prevCard.value)
-    
+
 def play_turn(player, lastCardPlayed):
     #[player] takes their turn
     if not player.bot:
@@ -106,7 +106,7 @@ def choose_human_card(player):
             continue
         return player.hand.takeCard(cards[0])
 
-def choose_bot_card(player, lastCardPlayed):   
+def choose_bot_card(player, lastCardPlayed):
     #bot player choses a card (using ai)
     matches = [x for x in player.hand.cards if x.value == lastCardPlayed.value]
     if len(matches) > 0:
@@ -119,22 +119,31 @@ def remove_life(player, lifelose):
         if player.lives == 0:
             print(player.name + ' is out of the game!')
 
-font = pygame.font.Font('freesansbold.ttf', 32) 
-  
+font = pygame.font.Font('freesansbold.ttf', 32)
+
 def render(players):
     win.fill(WHITE)
 
-    render_cards(players)
-    render_gui()
+    for seat in seats:
+        render_seat(seat)
+
+    for player in players:
+        render_player(player)
 
     pygame.display.update()
 
-def render_cards(players):
-    for p in players:
-        gui.gHand.draw(p.hand, win, p.seat.x, p.seat.y)
+def render_player(player):
+    render_cards(player)
+    render_lives(player)
 
-def render_gui():
-    pass
+def render_cards(player):
+    gui.gHand.draw(player.hand, win, player.seat.x, player.seat.y+SEAT_HEIGHT-CARD_HEIGHT)
+
+def render_lives(player):
+    gui.gLife.draw(player.lives, win, player.seat.x, player.seat.y)
+
+def render_seat(seat):
+    pass#gui.gSeat.draw(seat, win, seat.x, seat.y)
 
 def main():
 
@@ -153,23 +162,25 @@ def main():
 
     run = True
 
+    shuffle()
+    deal(players)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+          
 
-        active_players = [x for x in players if x.lives > 0]
-        
-        if len(active_players) == 1:
-            print(active_players[0].name + ' is the Winner! Congratulations!')
-            break
+        # active_players = [x for x in players if x.lives > 0]
 
-        shuffle()
-        deal(active_players)
+        # if len(active_players) == 1:
+        #     print(active_players[0].name + ' is the Winner! Congratulations!')
+        #     break
+
         render(players)
-        
-        play_rounds(active_players)
-       # empty_discard_deck() 
+
+       # play_rounds(active_players)
+       # empty_discard_deck()
 
 while True:
     if __name__ == '__main__':
