@@ -6,6 +6,23 @@ class Card:
         13 : 'King'
     }
 
+    def img_suit_index(self):
+        s = self.suit[0:1]
+        if s == "H":
+            return 0
+        if s == "D":
+            return 1
+        if s == "C":
+            return 2
+        if s == "S":
+            return 3
+    
+    def img_value_index(self):
+        if self.value == 1:
+            return 12
+        return self.value - 2
+    
+
     def __init__(self, suit, value):
         self.suit = suit;
         self.value = value;

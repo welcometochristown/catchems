@@ -1,17 +1,13 @@
 import pygame
+from gui import gCard
 from util import rect
 from gui.gColors import *
 from gui.gConstants import *
 
-def draw(deck, window, x, y, overlap=False):
+def draw(deck, window, font, card_images, x, y, faceup=False, overlap=False):
     for c in deck.cards:
-        pygame.draw.rect(window, WHITE, pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT))
-        pygame.draw.rect(window, BLACK, pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT),2)
-
-        if overlap:
-            x += CARD_WIDTH - CARD_OVERLAP
-        else:
-            x += CARD_WIDTH + CARD_SPACER
+        gCard.draw(c, window, font, card_images, x, y, faceup)
+        x += CARD_WIDTH + (-CARD_OVERLAP if overlap else CARD_SPACER)
 
 def isCardIntersect(deck, pos, x, y):
     for c in deck.cards:
