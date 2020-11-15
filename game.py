@@ -1,4 +1,4 @@
-iimport pygame
+import pygame
 
 #game modules
 from card import Card
@@ -7,23 +7,14 @@ from player import Player
 from seat import Seat
 
 import rules
-magesimport random
+import random
 from gui import gHand, gLife, gSeat
 from gui.gConstants import *
 from gui.gColors import *
 
-
-# import gui.gHand
-# from gui import *
-# from gui.gColors import *
-# from gui.gHand import *
-# from gui.gLife import *
-# from gui.gSeat import *
-
 # Screen
 WIDTH = 1350
 HEIGHT = 650
-EDGE_PADDING = 100
 
 pygame.init()
 win = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -31,11 +22,14 @@ pygame.display.set_caption("Catchem's")
 
 mainDeck = Deck()
 discardDeck = Deck(False)
+
+#circular seating
 # seats = [Seat((WIDTH/2) - (SEAT_WIDTH/2), HEIGHT-SEAT_HEIGHT), #human_player
 #          Seat(0, (HEIGHT/2) - (SEAT_HEIGHT/2)),
 #          Seat((WIDTH/2) - (SEAT_WIDTH/2), 0),
 #          Seat(WIDTH-(SEAT_WIDTH), (HEIGHT/2) - (SEAT_HEIGHT/2))] #bottom middle -> clockwise
 
+#bot vs human seating
 seats = [Seat((WIDTH/2) - (SEAT_WIDTH/2), HEIGHT-SEAT_HEIGHT), #human_player
          Seat(0, 0),
          Seat((WIDTH/2) - (SEAT_WIDTH/2), 0),
@@ -74,56 +68,6 @@ def deal(players, cards=rules.PLAYER_CARDS):
         for p in players:
             if p.lives > 0:
                 p.hand.add(mainDeck.take())
-
-# def play_rounds(players, rounds=rules.PLAYER_CARDS):
-#     #play [rounds] rounds for each player in [active_players]
-#     prevCard = None
-#     prevPlayer = None
-#     lifelose = rules.MIN_LIFE_LOSS
-
-#     for i in range(rounds):
-#         for p in players:
-#             if p.lives == 0:
-#                 if len(p.hand.cards) > 0:
-#                     discard_player_hand(p)
-#                 continue
-#             c = play_turn(p, prevCard)
-
-#             if compare_turns(prevCard, c):
-#                 remove_life(prevPlayer, lifelose)
-#                 lifelose +=1
-#             else:
-#                 lifelose = rules.MIN_LIFE_LOSS
-#             prevCard = c
-#             prevPlayer = p
-#         #end of round
-#         discard_turn_deck()
-
-# def compare_turns(prevCard, card):
-#     if prevCard is None:
-#         return False
-#     return (card.value == prevCard.value)
-
-# def play_turn(player, lastCardPlayed):
-#     #[player] takes their turn
-#     if not player.bot:
-#         card = choose_human_card(player)
-#     else:
-#         card = choose_bot_card(player, lastCardPlayed)
-
-#     print(player.name + ' plays ' + str(card))
-#     turnDeck.add(card)
-#     return card
-
-# def choose_human_card(player):
-#     #human player choses a card (using input)
-#     while True:
-#         print(player.hand.cards)
-#         choice = input('Please enter your card: ')
-#         cards = [x for x in player.hand.cards if x.short == choice]
-#         if len(cards) != 1:
-#             continue
-#         return player.hand.takeCard(cards[0])
 
 def choose_bot_card(player, lastCardPlayed):
     if bot_thinking_time > 0:
