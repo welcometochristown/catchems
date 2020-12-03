@@ -1,4 +1,8 @@
 
+# Screen
+WIDTH = 1350
+HEIGHT = 650
+
 CARD_SPACER = 5
 CARD_OVERLAP=15
 
