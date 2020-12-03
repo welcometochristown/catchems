@@ -22,7 +22,7 @@ class Graphics:
                 arr[y][x] = surf
         return arr
 
-    def render(self, players, seats, mainDeck, discardDeck, gamestate):
+    def render(self, players, seats, decks, gamestate):
         self.win.fill(WHITE)
         self.win.blit(self.bg_image, (0, 0))
 
@@ -32,7 +32,7 @@ class Graphics:
         for player in players:
             self.render_player(player)
 
-        self.render_discard_deck(discardDeck)
+        self.render_discard_deck(decks["discard"])
         self.render_cursor_marker(gamestate)
         self.render_life_value_lose(gamestate)
 

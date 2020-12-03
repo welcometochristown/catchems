@@ -20,8 +20,11 @@ gfx = Graphics()
 pygame.init()
 pygame.display.set_caption("Catchem's")
 
-mainDeck = Deck()
-discardDeck = Deck(False)
+decks = {
+    "main" : Deck(),
+    "discard" : Deck(False)
+}
+
 seats = [Seat((WIDTH/2) - (SEAT_WIDTH/2), HEIGHT-SEAT_HEIGHT), #human_player
          Seat(0, 0),
          Seat((WIDTH/2) - (SEAT_WIDTH/2), 0),
@@ -34,15 +37,15 @@ def create_bots():
     return arr
 
 def discard_player_hand(player):
-    discardDeck.add_deck(player.hand)
+    decks["discard"].add_deck(player.hand)
 
 def empty_discard_deck():
-    mainDeck.add_deck(discardDeck)
+    decks["main"].add_deck(decks["discard"])
 
 def shuffle():
     #shuffle the deck
     print ('shuffling..')
-    mainDeck.shuffle()
+    decks["main"].shuffle()
 
 def deal(players, cards=rules.PLAYER_CARDS):
     #deal [cards] cards to each player
@@ -50,7 +53,7 @@ def deal(players, cards=rules.PLAYER_CARDS):
     for i in range(cards):
         for p in players:
             if p.lives > 0:
-                p.hand.add(mainDeck.take())
+                p.hand.add(decks["main"].take())
 
 def choose_bot_card(player, lastCardPlayed):
     if gs.bot_thinking_time > 0:
@@ -64,7 +67,6 @@ def choose_bot_card(player, lastCardPlayed):
     return player.hand.take()
 
 def remove_life(player, lifelose):
-        print('taking life ' + str(lifelose))
         player.lives-=lifelose
         gs.last_life_value_lost = lifelose
         if player.lives == 0:
@@ -92,7 +94,7 @@ def check_selection():
             gs.last_life_value_lost = 0
 
         gs.last_card = gs.current_card
-        discardDeck.add(gs.current_card)
+        decks["discard"].add(gs.current_card)
         return True  
 
     return False
@@ -129,11 +131,11 @@ def main():
     for p in range(len(players)):
         players[p].seat = seats[p]
 
-    run = True
+    play = True
     shuffle_and_deal = True
     gs.current_player = human_player
 
-    while run:
+    while play:
 
         active_players_with_cards = [x for x in players if x.lives > 0 and len(x.hand.cards) > 0]
 
@@ -155,9 +157,9 @@ def main():
         elif check_selection():
             if not next_player(players):
                 print(gs.current_player.name + ' is the Winner! Congratulations!')
-                run = False
+                play = False
 
-        gfx.render(players, seats, mainDeck, discardDeck, gs)
+        gfx.render(players, seats, decks, gs)
 
 while True:
     if __name__ == '__main__':
